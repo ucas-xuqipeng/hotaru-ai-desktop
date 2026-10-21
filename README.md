@@ -6,6 +6,20 @@
 
 ![实际运行界面](docs/desktop.png)
 
+## 功能与运行方式
+
+| 项目 | 当前支持 |
+| --- | --- |
+| 桌面界面 | Windows x64 独立 EXE 窗口，一键启动本地后台与声音服务 |
+| 中文输入 | 键盘输入，或通过 SenseVoice 识别麦克风语音 |
+| 日语回答 | AI 生成日语台词，使用萤的 GPT-SoVITS 音色合成 |
+| 中文字幕 | 与日语台词配对生成，显示在聊天记录和模型下方 |
+| 模型表现 | AI 选择表情与动作，播放音频时驱动口型 |
+| 完整人设 | 合并角色分析档案与灵魂核心，保留第 20 话之后的状态 |
+| 对话接口 | 使用者自己的 OpenAI 兼容 API，默认模型标识为 `Qwen3.8-Flash-Next-NVFP4` |
+
+语音识别、声音合成和 Live2D 显示在电脑本地运行；对话文本发送到配置的 AI API，由该接口生成回复。语音合成可以使用 GPU 或 CPU，实际速度取决于电脑配置。
+
 ## 下载与使用
 
 前往 [Releases](https://github.com/ucas-xuqipeng/hotaru-ai-desktop/releases) 下载 Windows x64 便携版。仓库右上角的 **Code → Download ZIP 只包含源码**，不是完整运行包。
@@ -15,10 +29,23 @@
 1. 下载同一版本的全部 `.zip.001`、`.zip.002` 等分卷，以及 `Merge-Parts.cmd`，放在同一个文件夹。
 2. 双击 `Merge-Parts.cmd` 合并成 ZIP，再完整解压；也可以使用支持分卷的解压工具打开 `.zip.001`。
 3. 编辑解压目录下的 `config/config.yaml`，填写自己的 OpenAI 兼容 API 地址、密钥与模型名称。公开包不包含开发者的私人 API 密钥。
-4. 双击 **萤AI对话.exe**，等待本地服务和模型加载。
-5. 输入中文，或点击麦克风并授权，听取日语回答并查看中文字幕。
+4. 下载下方的[完整人设更新包](#完整人设更新2026-10-21)，把其中的 `backend` 文件夹合并到解压目录。
+5. 双击 **萤AI对话.exe**，等待本地服务和模型加载；在设置的“角色预设”中选择“萤 · 完整人设（第20话之后）”，新建对话。
+6. 输入中文，或点击麦克风并授权，听取日语回答并查看中文字幕。
 
 默认模型字符串保留为 `Qwen3.8-Flash-Next-NVFP4`；这是对接服务端使用的模型标识，需由你选择的 API 服务实际支持，也可改为其他支持结构化回复的模型。API 配置示例见 [config/config.example.yaml](config/config.example.yaml)，具体字段在 `character_config.agent_config.llm_configs.openai_compatible_llm` 下。
+
+只修改现有配置中对应的三个字段，保留其他配置。以下是字段位置示意，不能用它覆盖整个配置文件：
+
+```yaml
+character_config:
+  agent_config:
+    llm_configs:
+      openai_compatible_llm:
+        base_url: "https://api.example.com/v1"
+        llm_api_key: "YOUR_API_KEY"
+        model: "Qwen3.8-Flash-Next-NVFP4"
+```
 
 请复制**整个解压目录**，不能只复制 EXE。设置、历史记录与日志保存在 `data` 中；关闭窗口会清理本次启动的本地服务。首次加载可能需要几分钟，CPU 合成通常更慢。需要强制 CPU 时先关闭应用，再运行 `CPU模式启动.cmd`。
 
@@ -26,9 +53,27 @@
 
 ## 完整人设更新（2026-10-21）
 
-已将使用者提供的 **A_汐见萤.md** 与 **soul.md** 完整合并进默认配置示例，保留第 20 话及视角故事之后的角色状态、礼貌称呼、日常喜好与内在矛盾；继续使用日语配音、中文字幕及表情动作输出。两份原文按原始字节保存在 [人设资料目录](backend/characters/hotaru_persona_materials/)，出处与引用标注均保留。感谢使用者提供资料，以及原作、资料整理者与社区分享者；未提供可核实的整理者署名，不编造作者名称。
+已将使用者提供的两份资料完整合并进[默认配置示例](config/config.example.yaml)和[独立人设配置](backend/characters/hotaru_full_persona.yaml)，继续使用日语配音、中文字幕及表情动作输出。
 
-**已下载 v1.0.0 完整便携版的用户**：另下载 [Hotaru-Persona-20261021.zip](https://github.com/ucas-xuqipeng/hotaru-ai-desktop/releases/download/v1.0.0/Hotaru-Persona-20261021.zip)，将其中的 `backend` 文件夹合并到 EXE 所在目录，在设置的角色配置列表选择“萤 · 完整人设（第20话之后）”，然后新建对话。这个小更新包继承已有 API、声音及模型配置，不覆盖私人密钥，无需重新下载大分卷。重启后如恢复默认配置，请再次选择此人设。详细步骤见 [人设更新说明](docs/persona-update.md)。v1.0.0 的原始大分卷保持原样，人设更新由此小包提供。
+| 人设资料 | 内容与作用 |
+| --- | --- |
+| [A_汐见萤.md](backend/characters/hotaru_persona_materials/A_汐见萤.md) | 角色背景、剧情时间线、人物关系、语言习惯、日常喜好与原文依据 |
+| [soul.md](backend/characters/hotaru_persona_materials/soul.md) | 核心驱动力、价值观、自责与自我排除等内在心理 |
+
+当前时间锚点为乐队剧情第 20 话及视角故事之后：对外礼貌、纯真、温和而略显迟疑，内在矛盾仍未解决；日常也会自然地谈论音乐、园艺和零食。对同伴保留礼貌称呼，中文字幕中的“某某同学”在日语里自然表达为“○○さん”。不把第 19 话的短暂释怀当作已经完成的成长，也不要求每次闲聊都复述创伤。
+
+**v1.0.0 的原始大分卷尚未内置这次完整人设，首次下载和已经安装的用户都需要另加这个小包。**
+
+1. 下载 [Hotaru-Persona-20261021.zip](https://github.com/ucas-xuqipeng/hotaru-ai-desktop/releases/download/v1.0.0/Hotaru-Persona-20261021.zip)（约 37 KB）。
+2. 关闭桌面程序，将小包内的 `backend` 文件夹复制到 **萤AI对话.exe 所在目录**并合并，避免多套一层同名文件夹。
+3. 启动程序，在设置的“角色预设”中选择 **萤 · 完整人设（第20话之后）**。
+4. 新建对话开始使用；若重启后恢复默认配置，请再次选择此人设。
+
+更新包沿用已有 API、音色、Live2D 和历史记录标识，不覆盖 `config/config.yaml`，无需重新下载大分卷。旧对话已有的内容不会被重写。详细步骤见 [人设更新说明](docs/persona-update.md)。
+
+两份原文按原始字节保存在[人设资料目录](backend/characters/hotaru_persona_materials/)，出处与引用标注均保留。原文副本供查阅，程序实际读取 YAML 中合并后的 `persona_prompt`；只编辑 Markdown 不会自动改变人设。需要自行调整时，修改 `backend/characters/hotaru_full_persona.yaml` 中的 `character_config.persona_prompt`，保持原有双语 JSON、表情与动作输出要求，然后重新选择配置并新建对话。
+
+感谢使用者提供资料，以及原作、资料整理者与社区分享者；未提供可核实的整理者署名，不编造作者名称。
 
 ## 本次集成做了什么
 
@@ -63,6 +108,7 @@
 | [React](https://github.com/facebook/react)、[Vite](https://github.com/vitejs/vite)、[Chakra UI](https://github.com/chakra-ui/chakra-ui)、[i18next](https://github.com/i18next/i18next) | 前端框架、构建、界面与国际化 |
 | [FFmpeg](https://ffmpeg.org/) 与 [7-Zip](https://www.7-zip.org/) | 音频处理，以及便携包打包与完整性检查；FFmpeg 的完整许可、报告版本对应的固定源码和构建信息见 [FFmpeg-SOURCE.md](third_party/FFmpeg-SOURCE.md)，源码副本同时随 Release 提供 |
 | 提供素材的群友及原作者 | 萤的 Live2D、美术、动作、音色模型和参考语音 |
+| 使用者提供的人设资料、原作及资料整理者 | `A_汐见萤.md` 和 `soul.md`；完整保留角色分析、心理设定、原剧情引用及出处标注 |
 
 更完整的依赖版本和项目链接见 [third_party/DEPENDENCIES.json](third_party/DEPENDENCIES.json)，直接 JavaScript 依赖及锁定的间接依赖见 [frontend/package.json](frontend/package.json) 和 [frontend/package-lock.json](frontend/package-lock.json)；Python 项目声明见 [backend/pyproject.toml](backend/pyproject.toml)。感谢这些项目的所有维护者与贡献者。
 
@@ -83,6 +129,8 @@ third_party/   来源、许可证副本与依赖清单
 ## 验证情况与范围
 
 已通过 40 项桌面/前端测试与 49 项 Python 测试，并在本机实际完成 CPU/GPU 日语对话、中文字幕、点头、口型、播放结束、跨端口设置和背景保存、中文与空格目录迁移及退出清理验证。详见 [docs/validation.json](docs/validation.json)。截图来自实际运行的桌面应用。
+
+2026-10-21 完整人设更新后，使用配置的真实 Qwen 接口检查了日常喜好、奏多同学的称呼以及读完日记后尚未释怀的状态；再次运行实际 EXE，确认日语语音合成与播放、中文字幕、害羞表情、点头动作和口型正常，并在退出后清理本次启动的服务。人设原文副本经字节校验，独立人设配置继承原有 API、声音和历史记录标识。
 
 完整便携包在 Windows x64 本机验证；尚未在第二台实体电脑上实测，也没有把实体麦克风和屏幕共享人工验收记作已通过。公开包中的 API 配置为占位值，需要使用者填写自己的有效接口后才能对话。
 
