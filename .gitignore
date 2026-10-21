@@ -1,0 +1,12 @@
+config/config.yaml
+data/
+dist/
+runtime/
+node_modules/
+*.zip
+*.zip.*
+*.7z
+*.log
+__pycache__/
+.env
+.env.*

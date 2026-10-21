@@ -1,0 +1,50 @@
+[
+  {
+    "name": "mao_pro",
+    "description": "",
+    "url": "/live2d-models/mao_pro/runtime/mao_pro.model3.json",
+    "kScale": 0.5,
+    "initialXshift": 0,
+    "initialYshift": 0,
+    "kXOffset": 1150,
+    "idleMotionGroupName": "Idle",
+    "emotionMap": {
+      "neutral": 0,
+      "anger": 2,
+      "disgust": 2,
+      "fear": 1,
+      "joy": 3,
+      "smirk": 3,
+      "sadness": 1,
+      "surprise": 3
+    },
+    "tapMotions": {
+      "HitAreaHead": {
+        "": 1
+      },
+      "HitAreaBody": {
+        "": 1
+      }
+    }
+  },
+  {
+    "name": "hotaru",
+    "description": "汐见萤 · 日常服",
+    "url": "/live2d-models/chara/hotaru/casual_spring_01/adv_live2d_hotaru_016_casual_spring_01.model3.json",
+    "kScale": 0.8,
+    "initialXshift": 0,
+    "initialYshift": 0,
+    "idleMotionGroupName": "Idle",
+    "emotionMap": {
+      "neutral": "exp_idle01",
+      "happy": "exp_smile01",
+      "shy": "exp_shy01",
+      "thinking": "exp_thinking01",
+      "sad": "exp_sad01",
+      "surprised": "exp_surprised01",
+      "angry": "exp_angry01"
+    },
+    "tapMotions": {},
+    "defaultEmotion": "exp_idle01"
+  }
+]

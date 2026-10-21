@@ -1,0 +1,10 @@
+ffmpeg version n4.3.2-160-gfbb9368226 Copyright (c) 2000-2021 the FFmpeg developers
+  built with gcc 9.3-win32 (GCC) 20200320
+  configuration: --prefix=/ffbuild/prefix --pkg-config-flags=--static --pkg-config=pkg-config --cross-prefix=x86_64-w64-mingw32- --arch=x86_64 --target-os=mingw32 --enable-version3 --disable-debug --disable-w32threads --enable-pthreads --enable-iconv --enable-zlib --enable-libxml2 --enable-libfreetype --enable-libfribidi --enable-gmp --enable-lzma --enable-fontconfig --enable-opencl --enable-libvmaf --disable-vulkan --enable-libvorbis --enable-amf --enable-libaom --disable-avisynth --enable-libdav1d --disable-libdavs2 --enable-ffnvcodec --enable-cuda-llvm --disable-libglslang --enable-libass --enable-libbluray --enable-libmp3lame --enable-libopus --enable-libtheora --enable-libvpx --enable-libwebp --disable-lv2 --enable-libmfx --enable-libopencore-amrnb --enable-libopencore-amrwb --enable-libopenjpeg --enable-librav1e --disable-librubberband --enable-schannel --enable-sdl2 --enable-libsoxr --enable-libsrt --enable-libtwolame --disable-libvidstab --disable-libx264 --disable-libx265 --disable-libxavs2 --disable-libxvid --enable-libzimg --extra-cflags=-DLIBTWOLAME_STATIC --extra-cxxflags= --extra-ldflags=-pthread --extra-libs=-lgomp
+  libavutil      56. 51.100 / 56. 51.100
+  libavcodec     58. 91.100 / 58. 91.100
+  libavformat    58. 45.100 / 58. 45.100
+  libavdevice    58. 10.100 / 58. 10.100
+  libavfilter     7. 85.100 /  7. 85.100
+  libswscale      5.  7.100 /  5.  7.100
+  libswresample   3.  7.100 /  3.  7.100

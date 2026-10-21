@@ -1,0 +1,11 @@
+This repository is a multi-component integration. There is no single blanket
+license for the entire repository or its binary distribution.
+
+backend/: see backend/LICENSE (MIT) and its asset exceptions.
+frontend/: see frontend/LICENSE (Open-LLM-VTuber License 1.0).
+Live2D SDK and samples: see the licenses shipped with those components.
+GPT-SoVITS and Electron: see third_party/ and the binary distribution notices.
+Character artwork, motion data, voice weights and reference audio retain their
+original ownership and terms; they are not relicensed by this repository.
+
+See THIRD_PARTY_NOTICES.md and README.md for attribution and scope.
