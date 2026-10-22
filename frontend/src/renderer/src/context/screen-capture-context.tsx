@@ -22,7 +22,7 @@ export function ScreenCaptureProvider({ children }: { children: ReactNode }) {
     try {
       let mediaStream: MediaStream;
 
-      if (window.electron) {
+      if (window.electron && !(window.api as any)?.portablePet) {
         const sourceId = await window.electron.ipcRenderer.invoke('get-screen-capture');
 
         const displayMediaOptions: DisplayMediaStreamOptions = {

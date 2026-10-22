@@ -203,6 +203,7 @@ export const useLive2DModel = ({
   }, [getCanvasScale]);
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    if (isPet && window.api?.portablePet) return;
     const adapter = (window as any).getLAppAdapter?.();
     if (!adapter || !canvasRef.current) return;
 
@@ -239,9 +240,10 @@ export const useLive2DModel = ({
         modelStartPos.current = { x: matrix[12], y: matrix[13] };
       }
     }
-  }, [canvasRef, modelInfo]);
+  }, [canvasRef, modelInfo, isPet]);
 
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    if (isPet && window.api?.portablePet) return;
     const adapter = (window as any).getLAppAdapter?.();
     const view = LAppDelegate.getInstance().getView();
     const model = adapter?.getModel();
@@ -334,6 +336,7 @@ export const useLive2DModel = ({
   }, [isPet, isDragging, electronApi, canvasRef]);
 
   const handleMouseUp = useCallback((e: React.MouseEvent) => {
+    if (isPet && window.api?.portablePet) return;
     const adapter = (window as any).getLAppAdapter?.();
     const model = adapter?.getModel();
     const view = LAppDelegate.getInstance().getView();
@@ -382,9 +385,10 @@ export const useLive2DModel = ({
 
     // Reset potential tap flag regardless of outcome
     isPotentialTapRef.current = false;
-  }, [isDragging, canvasRef, modelInfo]);
+  }, [isDragging, canvasRef, modelInfo, isPet]);
 
   const handleMouseLeave = useCallback(() => {
+    if (isPet && window.api?.portablePet) return;
     if (isDragging) {
       // If dragging and mouse leaves, treat it like a mouse up to end drag
       handleMouseUp({} as React.MouseEvent); // Pass a dummy event or adjust handleMouseUp signature

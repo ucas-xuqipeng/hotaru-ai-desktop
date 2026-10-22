@@ -12,6 +12,7 @@ import { useAiState, AiStateEnum } from "@/context/ai-state-context";
 import { useLive2DExpression } from "@/hooks/canvas/use-live2d-expression";
 import { useForceIgnoreMouse } from "@/hooks/utils/use-force-ignore-mouse";
 import { useMode } from "@/context/mode-context";
+import { usePortablePet } from '@/hooks/electron/use-portable-pet';
 
 interface Live2DProps {
   showSidebar?: boolean;
@@ -26,6 +27,7 @@ export const Live2D = memo(
     const { aiState } = useAiState();
     const { resetExpression } = useLive2DExpression();
     const isPet = mode === 'pet';
+    const petHandlers = usePortablePet(isPet);
 
     // Get canvasRef from useLive2DResize
     const { canvasRef } = useLive2DResize({
@@ -105,9 +107,11 @@ export const Live2D = memo(
           position: "relative",
           cursor: isDragging ? "grabbing" : "default",
         }}
-        onPointerDown={handlePointerDown}
         onContextMenu={handleContextMenu}
         {...handlers}
+        onPointerDown={(window.api as any)?.portablePet ? petHandlers.onPointerDown : handlePointerDown}
+        onDoubleClick={petHandlers.onDoubleClick}
+        onWheelCapture={petHandlers.onWheelCapture}
       >
         <canvas
           id="canvas"

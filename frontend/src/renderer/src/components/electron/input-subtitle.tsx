@@ -11,7 +11,7 @@ import {
   VStack,
   IconButton,
 } from '@chakra-ui/react';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useInputSubtitle } from '@/hooks/electron/use-input-subtitle';
 import { useDraggable } from '@/hooks/electron/use-draggable';
 import { inputSubtitleStyles } from './electron-style';
@@ -46,7 +46,26 @@ export function InputSubtitle() {
     componentId: 'input-subtitle',
   });
 
-  const [isVisible, setIsVisible] = useState(true);
+  const portable = (window.api as any)?.portablePet === true;
+  const [isVisible, setIsVisible] = useState(!portable);
+  const [captionVisible, setCaptionVisible] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (!lastAIMessage) return;
+    setCaptionVisible(true);
+    const timer = setTimeout(() => setCaptionVisible(false), 15000);
+    return () => clearTimeout(timer);
+  }, [lastAIMessage]);
+
+  useEffect(() => {
+    if (isVisible && portable) inputRef.current?.focus();
+  }, [isVisible, portable]);
+
+  useEffect(() => {
+    if (!portable) return undefined;
+    return (window.api as any).onPetOpenInput(() => setIsVisible(true));
+  }, [portable]);
 
   const handleClose = useCallback(() => {
     if (isPet) {
@@ -77,6 +96,7 @@ export function InputSubtitle() {
     (window as any).inputSubtitle = {
       open: handleOpen,
       close: handleClose,
+      toggle: () => setIsVisible(value => !value),
     };
 
     return () => {
@@ -84,20 +104,30 @@ export function InputSubtitle() {
     };
   }, [isPet, handleClose]);
 
-  if (!isVisible) return null;
+  if (!isVisible) return portable && captionVisible && lastAIMessage ? (
+    <Box data-pet-panel="caption" position="absolute" bottom="16px" left="16px" right="16px"
+      zIndex={1000} bg="blackAlpha.800" color="white" borderRadius="xl" p="4"
+      maxH="220px" overflowY="auto" fontSize="sm" onClick={handleOpen} cursor="pointer">
+      {lastAIMessage}
+    </Box>
+  ) : null;
 
   return (
     <Box
       ref={elementRef}
+      data-pet-panel="input"
+      data-ai-state={aiState}
       {...inputSubtitleStyles.container}
       {...inputSubtitleStyles.draggableContainer(isDragging)}
-      onMouseDown={handleMouseDown}
+      bottom={portable ? '16px' : '120px'}
+      maxW={portable ? 'calc(100vw - 24px)' : 'fit-content'}
+      onMouseDown={portable ? undefined : handleMouseDown}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      <Box {...inputSubtitleStyles.box}>
+      <Box {...inputSubtitleStyles.box} maxW="calc(100vw - 24px)">
         <IconButton
-          aria-label="Close subtitle"
+          aria-label="收起对话"
           onClick={handleClose}
           {...inputSubtitleStyles.closeButton}
         >
@@ -107,6 +137,7 @@ export function InputSubtitle() {
         {hasAIMessages && (
           <VStack
             minH={lastAIMessage ? '32px' : '0px'}
+            maxH="220px" overflowY="auto"
             {...inputSubtitleStyles.messageStack}
           >
             {lastAIMessage && (
@@ -128,14 +159,14 @@ export function InputSubtitle() {
 
             <Flex gap="2">
               <IconButton
-                aria-label="Toggle microphone"
+                aria-label="开关麦克风"
                 onClick={handleMicToggle}
                 {...inputSubtitleStyles.iconButton}
               >
                 {micOn ? <LuMic size={16} /> : <LuMicOff size={16} />}
               </IconButton>
               <IconButton
-                aria-label="Interrupt"
+                aria-label="打断说话"
                 onClick={handleInterrupt}
                 {...inputSubtitleStyles.iconButton}
               >
@@ -148,12 +179,14 @@ export function InputSubtitle() {
         <Box {...inputSubtitleStyles.inputBox}>
           <Stack direction="row" gap="2" p="2">
             <Input
+              ref={inputRef}
+              data-hotaru-input
               value={inputValue}
               onChange={handleInputChange}
               onKeyDown={handleKeyPress}
               onCompositionStart={handleCompositionStart}
               onCompositionEnd={handleCompositionEnd}
-              placeholder="Type your message..."
+              placeholder="和萤说点什么…"
               {...inputSubtitleStyles.input}
             />
             <Button

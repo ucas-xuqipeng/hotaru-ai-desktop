@@ -7,6 +7,7 @@
  */
 
 import { CubismMatrix44 } from '@framework/math/cubismmatrix44';
+import { fitPetProjection } from '@/utils/pet-hit';
 import { ACubismMotion } from '@framework/motion/acubismmotion';
 import { csmVector } from '@framework/type/csmvector';
 
@@ -159,7 +160,11 @@ export class LAppLive2DManager {
           projection.scale(height / width, 1.0);
         }
 
-        // 必要があればここで乗算
+          // Leave room around the portable pet so the feet remain inside its native window.
+          if ((window as any).api?.portablePet && document.documentElement.dataset.petMode === 'pet') {
+            fitPetProjection(projection);
+          }
+          // 必要があればここで乗算
         if (this._viewMatrix != null) {
           projection.multiplyByMatrix(this._viewMatrix);
         }

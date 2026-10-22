@@ -1,0 +1,40 @@
+{
+  "version": "1.1.0",
+  "date": "2026-10-22",
+  "automated_tests": {
+    "passed": 55,
+    "failed": 0
+  },
+  "runtime": {
+    "nativePetWindow": true,
+    "transparentPixels": 575010,
+    "characterPixels": 130834,
+    "nativeResize": true,
+    "fullWindowMode": true,
+    "modeRoundtrip": true,
+    "chineseInputReady": true,
+    "idleGazeSimulatedCursor": true,
+    "idleGazeRight": true,
+    "idleGazeLeft": true
+  },
+  "protected_assets": {
+    "files": 124,
+    "changed": 0
+  },
+  "updater_and_rollback": "passed on Windows PowerShell 5 fixture",
+  "typescript": {
+    "existing_diagnostics": 588,
+    "new_diagnostics": 0,
+    "full_check_passed": false
+  },
+  "voice": {
+    "initial_run": "captioned Japanese audio, nod, smile, lip-sync and playback completed",
+    "latest_run": "remote API HTTP 503; no audio produced; end-to-end retest did not pass"
+  },
+  "manual_acceptance_not_claimed": [
+    "physical microphone",
+    "second physical computer",
+    "hardware mouse drag"
+  ],
+  "ordinary_startup": "does not take screenshots or automatically submit AI prompts"
+}

@@ -15,6 +15,18 @@ export const ModeProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [mode, setModeState] = useState<ModeType>('window');
   const isElectron = window.api !== undefined;
 
+  useEffect(() => {
+    const api = window.api as any;
+    if (!api?.portablePet) return;
+    let active = true;
+    api.getPetState().then((state: { mode: ModeType }) => {
+      if (active && ['pet', 'window'].includes(state?.mode)) {
+        setModeState(state.mode); api.ready();
+      }
+    }).catch(() => {});
+    return () => { active = false; };
+  }, []);
+
   const setMode = (newMode: ModeType) => {
     if (newMode === 'pet' && !isElectron) {
       toaster.create({
@@ -84,4 +96,4 @@ export const useMode = (): ModeContextType => {
     throw new Error('useMode must be used within a ModeProvider');
   }
   return context;
-}; 
+};

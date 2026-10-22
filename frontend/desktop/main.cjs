@@ -1,11 +1,13 @@
 'use strict';
-const { app, BrowserWindow, dialog, session, desktopCapturer } = require('electron');
+const { app, BrowserWindow, dialog, session, desktopCapturer, ipcMain, screen,
+  Tray, Menu, globalShortcut } = require('electron');
 const path = require('node:path');
 const fs = require('node:fs');
 const { ServiceManager, getBundlePaths } = require('./services.cjs');
 const { isAppUrl, requestedMedia } = require('./policy.cjs');
 const { PreferencesStore, restoreScript } = require('./preferences.cjs');
 const { chooseDisplayMedia, ownedPermission } = require('./display-media.cjs');
+const { PetController } = require('./pet-controller.cjs');
 
 const root = path.resolve(__dirname, '../..');
 const paths = getBundlePaths(root);
@@ -18,9 +20,16 @@ let window;
 let manager;
 let quitting = false;
 let origin = null;
+let pet;
+let tray;
+let cursorTimer;
 const preferences = new PreferencesStore(path.join(paths.data, 'preferences.json'));
 
 async function finishQuit() {
+  clearInterval(cursorTimer);
+  globalShortcut.unregisterAll();
+  pet?.save();
+  tray?.destroy();
   try {
     if (origin && window && !window.isDestroyed() && isAppUrl(window.webContents.getURL(), origin)) {
       await preferences.capture(window.webContents, origin);
@@ -34,7 +43,7 @@ async function finishQuit() {
 
 if (!app.requestSingleInstanceLock()) app.quit();
 else {
-  app.on('second-instance', () => { if (window) { if (window.isMinimized()) window.restore(); window.show(); window.focus(); } });
+  app.on('second-instance', () => { pet?.show(); });
   app.on('before-quit', event => {
     if (quitting) return;
     event.preventDefault(); quitting = true;
@@ -46,10 +55,50 @@ else {
 
 async function start() {
   window = new BrowserWindow({ title: '萤AI对话', icon: path.join(root, 'resources/icon.ico'),
-    width: 1280, height: 850, minWidth: 960, minHeight: 640,
-    autoHideMenuBar: true, backgroundColor: '#111827',
-    webPreferences: { contextIsolation: true, sandbox: true, nodeIntegration: false, webSecurity: true } });
+    width: 460, height: 650, minWidth: 260, minHeight: 300, show: false,
+    frame: false, transparent: true, hasShadow: false, resizable: false,
+    autoHideMenuBar: true, backgroundColor: '#00000000',
+    webPreferences: { preload: path.join(__dirname, 'pet-preload.cjs'),
+      contextIsolation: true, sandbox: true, nodeIntegration: false, webSecurity: true } });
   window.removeMenu();
+  pet = new PetController({ window, screen, statePath: path.join(paths.data, 'pet-window.json'),
+    getOrigin: () => origin,
+    initialMode: process.argv.includes('--window') ? 'window' : process.argv.includes('--pet') ? 'pet' : undefined });
+  pet.quit = () => app.quit();
+  pet.onReady = () => { pet.show(); window.setAlwaysOnTop(pet.mode === 'pet'); };
+  const channels = ['pre-mode-changed', 'update-component-hover', 'pet-drag', 'pet-resize',
+    'show-context-menu', 'toggle-force-ignore-mouse', 'pet-ready', 'window-close',
+    'window-minimize', 'window-maximize', 'window-unfullscreen'];
+  for (const channel of channels) ipcMain.on(channel, (event, ...args) => pet.handle(event, channel, ...args));
+  ipcMain.handle('pet-get-state', event => pet.handle(event, 'pet-get-state'));
+  tray = new Tray(path.join(root, 'resources/icon.ico'));
+  tray.setToolTip('萤桌宠 · 正在加载模型');
+  const buildMenu = () => Menu.buildFromTemplate([
+    { label: '与萤对话（Ctrl+Alt+H）', click: () => pet.openInput() },
+    { label: '桌宠模式', type: 'radio', checked: pet.mode === 'pet', click: () => { pet.setMode('pet'); pet.show(); } },
+    { label: '完整窗口 / 设置', type: 'radio', checked: pet.mode === 'window', click: () => { pet.setMode('window'); pet.show(); window.focus(); } },
+    { type: 'separator' },
+    { label: '显示萤', click: () => pet.show() }, { label: '暂时隐藏', click: () => window.hide() },
+    { label: '放大', enabled: pet.mode === 'pet', click: () => pet.resize(1.12) },
+    { label: '缩小', enabled: pet.mode === 'pet', click: () => pet.resize(1 / 1.12) },
+    { label: '恢复默认大小和位置', click: () => pet.reset() },
+    { label: '完全鼠标穿透', type: 'checkbox', checked: pet.forceIgnore, click: () => pet.toggleForceIgnore() },
+    { type: 'separator' },
+    { label: '开关麦克风', click: () => pet.emit('mic-toggle') },
+    { label: '打断说话', click: () => pet.emit('interrupt') },
+    { type: 'separator' }, { label: '退出萤桌宠', click: () => app.quit() },
+  ]);
+  pet.showMenu = () => buildMenu().popup({ window });
+  pet.onStateChange = () => tray.setContextMenu(buildMenu());
+  tray.setContextMenu(buildMenu());
+  tray.on('double-click', () => pet.openInput());
+  globalShortcut.register('CommandOrControl+Alt+H', () => pet.openInput(true));
+  screen.on('display-removed', () => pet.recover());
+  screen.on('display-metrics-changed', () => pet.recover());
+  window.on('maximize', () => pet.emit('window-maximized-change', true));
+  window.on('unmaximize', () => pet.emit('window-maximized-change', false));
+  pet.setMode(pet.mode);
+  cursorTimer = setInterval(() => pet.tick(), 32);
   // Keep the page alive until preferences are captured, including native close/X.
   window.on('close', event => { if (!quitting) { event.preventDefault(); app.quit(); } });
   window.on('page-title-updated', event => { event.preventDefault(); window.setTitle('萤AI对话'); });
@@ -96,7 +145,13 @@ async function start() {
     const verifyArg = process.argv.find(arg => arg.startsWith('--verify='));
     const verify = verifyArg ? await require('./verify.cjs').createVerification(window, verifyArg.slice('--verify='.length)) : null;
     await window.loadURL(appUrl);
+    tray.setToolTip('萤桌宠 · 双击人物或 Ctrl+Alt+H 对话');
+    const petVerifyArg = process.argv.find(arg => arg.startsWith('--verify-pet='));
+    if (petVerifyArg) {
+      await require('./pet-verification.cjs').verifyPet(window, pet, petVerifyArg.slice('--verify-pet='.length));
+    }
     if (verify) {
+      pet.openInput();
       await verify();
       if (process.argv.includes('--exit-after-verify')) app.quit();
     }

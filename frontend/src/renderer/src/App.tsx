@@ -38,6 +38,13 @@ function AppContent(): JSX.Element {
   const live2dContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    document.documentElement.dataset.petMode = mode;
+    for (const el of [document.documentElement, document.body, document.getElementById('root')]) {
+      el?.style.setProperty('background', mode === 'pet' ? 'transparent' : '#111827', 'important');
+    }
+  }, [mode]);
+
+  useEffect(() => {
     const handleResize = () => {
       const vh = window.innerHeight * 0.01;
       document.documentElement.style.setProperty("--vh", `${vh}px`);

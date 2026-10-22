@@ -47,10 +47,11 @@ async function createVerification(window, outputPath) {
         await delay(500);
       }
       if (!ready) throw new Error('ui-not-ready');
+      // Activating a transparent Windows overlay can reset DOM focus; focus the input afterwards.
+      window.show?.(); window.focus?.(); wc.focus?.();
       const found = await wc.executeJavaScript(`(() => { const input = document.querySelector('[data-hotaru-input]'); if (!input) return false; input.focus(); return true; })()`);
       if (!found) throw new Error('ui-not-ready');
       // Native input events follow the same React handlers as a person typing.
-      window.show?.(); window.focus?.(); wc.focus?.();
       await wc.insertText(PROMPT);
       await delay(100);
       submitted = true;

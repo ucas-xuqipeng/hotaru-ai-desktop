@@ -55,7 +55,6 @@ export function useIpcHandlers() {
 
   useEffect(() => {
     if (!window.electron?.ipcRenderer) return;
-    if (!isPet) return;
 
     window.electron.ipcRenderer.removeAllListeners("mic-toggle");
     window.electron.ipcRenderer.removeAllListeners("interrupt");

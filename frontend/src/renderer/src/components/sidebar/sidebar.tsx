@@ -62,7 +62,7 @@ const ModeMenu = memo(({ setMode, currentMode, isElectron }: {
             <Menu.ItemIndicator />
             Live Mode
           </Menu.RadioItem>
-          {!isPortableDesktop(window.location.search) && <Menu.RadioItem
+          {(!isPortableDesktop(window.location.search) || (window.api as any)?.portablePet) && <Menu.RadioItem
             value="pet" 
             onClick={() => {
               if (isElectron) {
